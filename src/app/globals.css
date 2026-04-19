@@ -413,9 +413,9 @@ select {
   display: flex;
   flex-direction: column;
   align-items: stretch;
-  gap: 12px;
-  min-height: 190px;
-  padding: 18px;
+  gap: 10px;
+  min-height: 168px;
+  padding: 16px 18px 18px;
   border-radius: 22px;
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.94), rgba(247, 249, 253, 0.94));
@@ -432,12 +432,12 @@ select {
   gap: 12px;
   align-self: flex-start;
   justify-content: center;
-  min-height: 58px;
-  padding: 14px 18px;
+  min-height: 50px;
+  padding: 11px 15px;
   border-radius: 18px;
   background: rgba(237, 241, 252, 0.96);
   color: #5569d8;
-  font-size: 1.32rem;
+  font-size: 1.16rem;
   font-weight: 800;
 }
 
@@ -445,17 +445,23 @@ select {
   font-size: 1.08rem;
 }
 
+.content-body {
+  display: grid;
+  gap: 8px;
+}
+
 .content-title {
-  margin-bottom: 8px;
   color: var(--muted);
-  font-size: 0.88rem;
-  font-weight: 700;
+  font-size: 0.84rem;
+  font-weight: 600;
+  line-height: 1.45;
 }
 
 .content-text {
-  font-size: 1rem;
-  line-height: 1.6;
-  font-weight: 700;
+  font-size: 1.18rem;
+  line-height: 1.46;
+  font-weight: 800;
+  letter-spacing: -0.01em;
 }
 
 .summary-grid {
@@ -1101,14 +1107,60 @@ select {
     padding-right: 0;
   }
 
+  .hero-kicker,
+  .section-kicker {
+    font-size: 0.72rem;
+    letter-spacing: 0.12em;
+  }
+
+  .hero-copy h1 {
+    margin-top: 8px;
+    font-size: clamp(2rem, 13vw, 3.1rem);
+  }
+
+  .hero-description {
+    margin-top: 10px;
+    font-size: 0.96rem;
+    line-height: 1.58;
+  }
+
   .settings-button {
     position: static;
     margin-bottom: 22px;
   }
 
+  .hero-actions {
+    gap: 12px;
+    margin-top: 18px;
+  }
+
   .date-switcher {
     width: 100%;
+    gap: 10px;
+    padding: 8px 10px;
     justify-content: space-between;
+  }
+
+  .date-switcher-center {
+    min-width: 0;
+    flex: 1;
+  }
+
+  .date-picker-trigger {
+    min-height: 46px;
+    padding: 0 14px;
+  }
+
+  .date-nav-button {
+    width: 38px;
+    height: 38px;
+    font-size: 1.6rem;
+  }
+
+  .date-label {
+    font-size: clamp(0.96rem, 5.8vw, 1.2rem);
+    line-height: 1.2;
+    white-space: nowrap;
   }
 
   .hero-actions {
@@ -1118,19 +1170,102 @@ select {
   .notice-banner {
     width: 100%;
     min-height: 0;
+    padding: 12px 14px;
+    border-radius: 16px;
+    font-size: 0.92rem;
+  }
+
+  .section-heading {
+    align-items: flex-start;
+    margin-bottom: 16px;
+  }
+
+  .section-heading h2 {
+    margin-top: 6px;
+    font-size: clamp(1.8rem, 9vw, 2.4rem);
+  }
+
+  .section-status {
+    font-size: 0.9rem;
   }
 
   .content-list {
     grid-template-columns: 1fr;
+    gap: 10px;
   }
 
-  .summary-grid,
   .participant-grid,
-  .participant-actions,
   .date-range-fields,
   .inline-form,
   .import-preview-row {
     grid-template-columns: 1fr;
+  }
+
+  .summary-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+
+  .content-card {
+    display: grid;
+    grid-template-columns: 110px minmax(0, 1fr);
+    align-items: start;
+    gap: 12px;
+    min-height: 0;
+    padding: 14px;
+    border-radius: 20px;
+  }
+
+  .content-pill {
+    width: 100%;
+    min-height: 48px;
+    padding: 10px 12px;
+    justify-content: center;
+    font-size: 1.04rem;
+  }
+
+  .content-pill-icon {
+    font-size: 1rem;
+  }
+
+  .content-body {
+    gap: 6px;
+    padding-top: 2px;
+  }
+
+  .content-text {
+    font-size: 1.05rem;
+    line-height: 1.4;
+  }
+
+  .content-title {
+    font-size: 0.78rem;
+  }
+
+  .summary-card {
+    padding: 18px 16px 16px;
+    border-radius: 22px;
+  }
+
+  .summary-card-head {
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin-bottom: 14px;
+    text-align: center;
+  }
+
+  .summary-label {
+    font-size: 0.96rem;
+  }
+
+  .summary-value {
+    font-size: 1.32rem;
+  }
+
+  .summary-bar {
+    height: 10px;
   }
 
   .import-actions {
@@ -1144,7 +1279,65 @@ select {
   }
 
   .participant-head h3 {
-    font-size: 1.5rem;
+    font-size: 1.4rem;
+  }
+
+  .participant-card {
+    padding: 18px 16px 16px;
+    border-radius: 24px;
+  }
+
+  .participant-head {
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+
+  .participant-avatar {
+    width: 58px;
+    height: 58px;
+    font-size: 1.56rem;
+  }
+
+  .participant-head h3 {
+    font-size: 1.28rem;
+  }
+
+  .participant-head p {
+    margin-top: 4px;
+    font-size: 0.9rem;
+  }
+
+  .participant-actions {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .checkin-chip {
+    gap: 0;
+    min-height: 46px;
+    padding: 8px 10px;
+    border-radius: 14px;
+    font-size: 0.95rem;
+  }
+
+  .checkin-chip-icon {
+    font-size: 0.92rem;
+  }
+
+  .checkin-chip:not(.checkin-chip-checked) .checkin-chip-icon {
+    display: none;
+  }
+
+  .checkin-chip-checked {
+    padding: 8px;
+  }
+
+  .checkin-chip-checked .checkin-chip-icon {
+    font-size: 1.72rem;
+  }
+
+  .checkin-chip-checked span:last-child {
+    display: none;
   }
 
   .participant-calendar-day {
@@ -1154,5 +1347,65 @@ select {
   .participant-calendar-weekdays,
   .participant-calendar-grid {
     gap: 6px;
+  }
+}
+
+@media (max-width: 560px) {
+  .summary-panel,
+  .participants-panel {
+    padding: 18px 16px;
+  }
+
+  .section-heading {
+    gap: 10px;
+  }
+
+  .summary-grid {
+    gap: 10px;
+  }
+
+  .summary-card {
+    padding: 16px 14px 14px;
+  }
+
+  .summary-label {
+    font-size: 0.9rem;
+  }
+
+  .summary-value {
+    font-size: 1.18rem;
+  }
+
+  .participant-card {
+    padding: 16px 14px 14px;
+  }
+
+  .participant-avatar {
+    width: 54px;
+    height: 54px;
+    font-size: 1.42rem;
+  }
+
+  .participant-head h3 {
+    font-size: 1.18rem;
+  }
+
+  .participant-head p {
+    font-size: 0.86rem;
+  }
+
+  .participant-actions {
+    gap: 7px;
+  }
+
+  .checkin-chip {
+    min-height: 42px;
+    padding: 6px 8px;
+    border-radius: 13px;
+    font-size: 0.9rem;
+  }
+
+  .checkin-chip-checked .checkin-chip-icon {
+    font-size: 1.56rem;
   }
 }

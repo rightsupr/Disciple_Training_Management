@@ -715,8 +715,8 @@ export function CheckinApp({ initialDate, initialData }: CheckinAppProps) {
                   </div>
 
                   <div className="content-body">
-                    <p className="content-title">{meta.hint}</p>
                     <p className="content-text">{displayText}</p>
+                    <p className="content-title">{meta.hint}</p>
                   </div>
                 </article>
               );
