@@ -7,6 +7,10 @@ import type { AdminSessionState } from "@/lib/types";
 const ADMIN_COOKIE_NAME = "disciple_training_admin";
 const SESSION_DURATION_SECONDS = 60 * 60 * 24 * 7;
 
+type SessionCookieOptions = {
+  secure?: boolean;
+};
+
 function getAdminConfig() {
   return {
     username: process.env.ADMIN_USERNAME?.trim() || "admin",
@@ -66,25 +70,42 @@ export function validateAdminCredentials(username: string, password: string) {
   return username === config.username && password === config.password;
 }
 
-export function attachAdminSession(response: NextResponse, username: string) {
+function getSessionCookieSecure(options?: SessionCookieOptions) {
+  return options?.secure ?? process.env.NODE_ENV === "production";
+}
+
+export function getRequestSessionCookieOptions(request: Request): SessionCookieOptions {
+  const forwardedProto = request.headers.get("x-forwarded-proto")?.trim().toLowerCase();
+  const protocol = forwardedProto || new URL(request.url).protocol.replace(":", "");
+
+  return {
+    secure: protocol === "https",
+  };
+}
+
+export function attachAdminSession(
+  response: NextResponse,
+  username: string,
+  options?: SessionCookieOptions,
+) {
   response.cookies.set({
     name: ADMIN_COOKIE_NAME,
     value: createSessionToken(username),
     httpOnly: true,
     sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
+    secure: getSessionCookieSecure(options),
     path: "/",
     maxAge: SESSION_DURATION_SECONDS,
   });
 }
 
-export function clearAdminSession(response: NextResponse) {
+export function clearAdminSession(response: NextResponse, options?: SessionCookieOptions) {
   response.cookies.set({
     name: ADMIN_COOKIE_NAME,
     value: "",
     httpOnly: true,
     sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
+    secure: getSessionCookieSecure(options),
     path: "/",
     maxAge: 0,
   });

@@ -1,11 +1,16 @@
 import { NextResponse } from "next/server";
 
-import { attachAdminSession, validateAdminCredentials } from "@/lib/auth";
+import {
+  attachAdminSession,
+  getRequestSessionCookieOptions,
+  validateAdminCredentials,
+} from "@/lib/auth";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 export async function POST(request: Request) {
+  const cookieOptions = getRequestSessionCookieOptions(request);
   const body = (await request.json()) as {
     username?: string;
     password?: string;
@@ -30,7 +35,7 @@ export async function POST(request: Request) {
     },
   });
 
-  attachAdminSession(response, username);
+  attachAdminSession(response, username, cookieOptions);
 
   return response;
 }
