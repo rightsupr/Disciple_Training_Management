@@ -48,6 +48,8 @@ type ContentRow = {
   scriptureText: string;
 };
 
+const REST_CONTENT_TEXT = "休息";
+
 declare global {
   var __discipleTrainingDb: DatabaseHandle | undefined;
 }
@@ -61,6 +63,22 @@ function getDatabasePath() {
 
 function getNameInitial(name: string) {
   return name.trim().charAt(0) || "门";
+}
+
+function isRestContent(value: string) {
+  return value.trim() === REST_CONTENT_TEXT;
+}
+
+function isRestItem(content: ContentRow, item: CheckinItemKey) {
+  return isRestContent(content[CONTENT_FIELD_MAP[item]]);
+}
+
+function getRestItems(content: ContentRow) {
+  return CHECKIN_ITEMS.filter((item) => isRestItem(content, item));
+}
+
+function isAvailableItem(content: ContentRow, item: CheckinItemKey) {
+  return item === "dailyReading" || content[CONTENT_FIELD_MAP[item]].trim().length > 0;
 }
 
 function initializeDatabase() {
@@ -269,16 +287,19 @@ export function getDashboardData(dateInput: string): DashboardData {
     itemType: CheckinItemKey;
   }>;
 
-  const activeItems = CHECKIN_ITEMS.filter(
-    (item) => item === "dailyReading" || content[CONTENT_FIELD_MAP[item]].trim().length > 0,
-  );
+  const activeItems = CHECKIN_ITEMS.filter((item) => isAvailableItem(content, item));
+  const restItems = getRestItems(content);
+  const restItemSet = new Set(restItems);
   const checkinSet = new Set(
     checkins.map((checkin) => `${checkin.participantId}:${checkin.itemType}`),
   );
 
   const participants: ParticipantCard[] = participantRows.map((participant) => {
     const statuses = Object.fromEntries(
-      CHECKIN_ITEMS.map((item) => [item, checkinSet.has(`${participant.id}:${item}`)]),
+      CHECKIN_ITEMS.map((item) => [
+        item,
+        restItemSet.has(item) || checkinSet.has(`${participant.id}:${item}`),
+      ]),
     ) as Record<CheckinItemKey, boolean>;
 
     const completionCount = CHECKIN_ITEMS.reduce(
@@ -314,6 +335,7 @@ export function getDashboardData(dateInput: string): DashboardData {
     todayKey: getTodayDateKey(),
     content,
     availableItems: activeItems,
+    restItems,
     participants,
     summary: {
       devotion: buildSummaryMetric(
@@ -501,18 +523,26 @@ export function getParticipantCalendarData(participantId: number, monthInput: st
   );
 
   const days: ParticipantCalendarDay[] = getDateKeysInMonth(monthKey).map((dateKey) => {
+    const content = getContentRow(dateKey);
+    const restItemSet = new Set(getRestItems(content));
+    const isWeeklyTaskComplete =
+      restItemSet.has("weeklyTask") || weeklyTaskWeekStarts.has(getWeekStartDateKey(dateKey));
+    const isDailyComplete = (["devotion", "dailyReading", "scripture"] as const).every((item) => {
+      return restItemSet.has(item) || dailyCheckinSet.has(`${dateKey}:${item}`);
+    });
     const completionCount = CHECKIN_ITEMS.reduce((count, item) => {
       if (item === "weeklyTask") {
-        return count + (weeklyTaskWeekStarts.has(getWeekStartDateKey(dateKey)) ? 1 : 0);
+        return count + (isWeeklyTaskComplete ? 1 : 0);
       }
 
-      return count + (dailyCheckinSet.has(`${dateKey}:${item}`) ? 1 : 0);
+      return count + (restItemSet.has(item) || dailyCheckinSet.has(`${dateKey}:${item}`) ? 1 : 0);
     }, 0);
 
     return {
       date: dateKey,
       completionCount,
       totalCount: CHECKIN_ITEMS.length,
+      isDailyComplete,
       isComplete: completionCount === CHECKIN_ITEMS.length,
     };
   });
@@ -557,6 +587,10 @@ export function toggleCheckin(
 
   const content = getContentRow(dateKey);
   const contentField = CONTENT_FIELD_MAP[itemType];
+
+  if (isRestItem(content, itemType)) {
+    throw new Error("这一项今日为休息，无需手动打卡。");
+  }
 
   if (itemType !== "dailyReading" && !content[contentField].trim()) {
     throw new Error("管理员尚未上传这一项的内容。");

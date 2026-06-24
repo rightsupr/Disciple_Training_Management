@@ -53,6 +53,7 @@ export interface DashboardData {
   todayKey: string;
   content: DailyContent;
   availableItems: CheckinItemKey[];
+  restItems: CheckinItemKey[];
   participants: ParticipantCard[];
   summary: DashboardSummary;
 }
@@ -82,6 +83,7 @@ export interface ParticipantCalendarDay {
   date: string;
   completionCount: number;
   totalCount: number;
+  isDailyComplete: boolean;
   isComplete: boolean;
 }
 

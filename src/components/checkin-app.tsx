@@ -2,6 +2,7 @@
 
 import { startTransition, useEffect, useRef, useState } from "react";
 
+import { APP_VERSION } from "@/lib/app-version";
 import { formatChineseDateLabel, shiftDateKey } from "@/lib/date";
 import {
   CHECKIN_ITEMS,
@@ -564,6 +565,11 @@ export function CheckinApp({ initialDate, initialData }: CheckinAppProps) {
     setParticipantCalendarData(null);
   }
 
+  async function handleParticipantCalendarDateSelect(dateKey: string) {
+    setParticipantCalendarTarget(null);
+    await refreshDashboard(dateKey);
+  }
+
   const dateLabel = formatChineseDateLabel(selectedDate, dashboard.todayKey);
   const calendarDays = buildCalendarDays(calendarMonth, selectedDate, dashboard.todayKey);
   const [calendarYear, calendarMonthNumber] = calendarMonth.split("-").map(Number);
@@ -805,6 +811,7 @@ export function CheckinApp({ initialDate, initialData }: CheckinAppProps) {
                     {CHECKIN_ITEMS.map((item) => {
                       const meta = CHECKIN_ITEM_META[item];
                       const enabled = dashboard.availableItems.includes(item);
+                      const isRest = dashboard.restItems.includes(item);
                       const checked = participant.statuses[item];
                       const isPending = pendingAction === `${participant.id}:${item}`;
 
@@ -813,18 +820,19 @@ export function CheckinApp({ initialDate, initialData }: CheckinAppProps) {
                           key={item}
                           type="button"
                           className={`checkin-chip ${checked ? "checkin-chip-checked" : ""} ${
-                            !enabled ? "checkin-chip-disabled" : ""
-                          }`}
+                            isRest ? "checkin-chip-rest" : ""
+                          } ${!enabled ? "checkin-chip-disabled" : ""}`}
                           onClick={(event) => {
                             event.stopPropagation();
                             void handleToggleCheckin(participant.id, item);
                           }}
-                          disabled={!enabled || isPending}
+                          disabled={!enabled || isRest || isPending}
+                          title={isRest ? "今日休息，无需手动打卡" : undefined}
                         >
                           <span className="checkin-chip-icon" aria-hidden="true">
                             {checked ? "✓" : meta.icon}
                           </span>
-                          <span>{checked ? "已完成" : meta.shortLabel}</span>
+                          <span>{isRest ? "休息" : checked ? "已完成" : meta.shortLabel}</span>
                         </button>
                       );
                     })}
@@ -848,7 +856,10 @@ export function CheckinApp({ initialDate, initialData }: CheckinAppProps) {
             <div className="modal-header">
               <div>
                 <p className="section-kicker">管理员系统</p>
-                <h2>内容管理后台</h2>
+                <div className="admin-title-row">
+                  <h2>内容管理后台</h2>
+                  <span className="version-badge">v{APP_VERSION}</span>
+                </div>
               </div>
               <button className="modal-close" type="button" onClick={() => setModalOpen(false)}>
                 关闭
@@ -1126,7 +1137,7 @@ export function CheckinApp({ initialDate, initialData }: CheckinAppProps) {
               <div>
                 <p className="section-kicker">人物月历</p>
                 <h2>{participantCalendarTarget.name}</h2>
-                <p className="participant-calendar-hint">绿色表示当天已完整打卡。</p>
+                <p className="participant-calendar-hint">绿色完整，淡黄差周任务。点击日期可跳转补卡。</p>
               </div>
               <button
                 className="modal-close"
@@ -1175,26 +1186,32 @@ export function CheckinApp({ initialDate, initialData }: CheckinAppProps) {
                   {participantCalendarDays.map((day) => {
                     const dayStatus = participantCalendarDayMap.get(day.dateKey);
                     const isComplete = day.inCurrentMonth && Boolean(dayStatus?.isComplete);
+                    const isDailyComplete =
+                      day.inCurrentMonth && !isComplete && Boolean(dayStatus?.isDailyComplete);
                     const progressText =
                       day.inCurrentMonth && dayStatus
                         ? `已完成 ${dayStatus.completionCount}/${dayStatus.totalCount}`
                         : "";
 
                     return (
-                      <div
+                      <button
                         key={day.dateKey}
                         className={`participant-calendar-day ${
                           day.inCurrentMonth ? "" : "participant-calendar-day-outside"
                         } ${
                           isComplete
                             ? "participant-calendar-day-complete"
+                            : isDailyComplete
+                              ? "participant-calendar-day-daily-complete"
                             : "participant-calendar-day-incomplete"
                         } ${day.inCurrentMonth && day.isToday ? "participant-calendar-day-today" : ""}`}
+                        type="button"
+                        onClick={() => void handleParticipantCalendarDateSelect(day.dateKey)}
                         data-progress={progressText}
                         title={progressText || undefined}
                       >
                         <span className="participant-calendar-day-number">{day.day}</span>
-                      </div>
+                      </button>
                     );
                   })}
                 </div>
